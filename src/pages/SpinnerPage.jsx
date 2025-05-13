@@ -90,6 +90,8 @@ function SpinnerPage() {
 
     socket.on("spinner:result", (data) => {
       setWinner(data.winner);
+      setSpinning(false); // Stop spinner for admin too
+
     });
 
     return () => {
@@ -117,14 +119,22 @@ function SpinnerPage() {
   };
 
   const startSpinner = async () => {
+  setSpinning(true);         // Show spinner loading
+  setWinner(null);           // Clear old winner
+
+  setTimeout(async () => {
     try {
-      await axios.post("http://localhost:5000/api/spinner/start", { members: selectedIds }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        "http://localhost:5000/api/spinner/start",
+        { members: selectedIds },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
     } catch (err) {
       console.error("Failed to start spinner", err);
+      setSpinning(false); // stop loading on error
     }
-  };
+  }, 3000); // wait 3 seconds before actual spin
+};
 
   return (
     <div className="container mt-5 text-center">
